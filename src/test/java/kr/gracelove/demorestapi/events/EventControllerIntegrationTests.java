@@ -3,7 +3,9 @@ package kr.gracelove.demorestapi.events;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
@@ -18,8 +20,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest
-public class EventControllerTests {
+@SpringBootTest
+@AutoConfigureMockMvc
+public class EventControllerIntegrationTests {
 
     @Autowired
     MockMvc mockMvc;
@@ -27,13 +30,9 @@ public class EventControllerTests {
     @Autowired
     ObjectMapper objectMapper;
 
-    @MockBean
-    EventRepository eventRepository;
-
     @Test
     void createEvent() throws Exception {
-
-        EventCreateDto dto = EventCreateDto.builder()
+        Event event = Event.builder()
                 .name("모각코")
                 .description("모여서 각자 코딩")
                 .beginEnrollmentDateTime(LocalDateTime.of(2020, 4, 20, 17, 0))
@@ -43,12 +42,8 @@ public class EventControllerTests {
                 .basePrice(100)
                 .maxPrice(200)
                 .limitOfEnrollment(100)
+                .location("강남역 D2 스타트업 팩토리")
                 .build();
-
-        Event event = dto.toEntity();
-
-        event.setId(10);
-        given(eventRepository.save(any())).willReturn(event);
 
         mockMvc.perform(post("/api/events")
                     .contentType(MediaType.APPLICATION_JSON)
