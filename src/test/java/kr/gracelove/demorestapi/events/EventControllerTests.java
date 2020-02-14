@@ -54,13 +54,43 @@ public class EventControllerTests {
                     .contentType(MediaType.APPLICATION_JSON)
                     .characterEncoding("utf8")
                     .accept(MediaTypes.HAL_JSON)
-                    .content(objectMapper.writeValueAsString(event)))
+                    .content(objectMapper.writeValueAsString(dto)))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.eventStatus").value(EventStatus.DRAFT.name()))
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE));
+    }
+
+    @Test
+    void createEvent_bad_request() throws Exception {
+
+        Event event = Event.builder()
+                .id(100)
+                .name("모각코")
+                .description("모여서 각자 코딩")
+                .beginEnrollmentDateTime(LocalDateTime.of(2020, 4, 20, 17, 0))
+                .closeEnrollmentDateTime(LocalDateTime.of(2020, 4, 21, 17, 0))
+                .beginEventDateTime(LocalDateTime.of(2020, 5, 1, 13, 0))
+                .endEventDateTime(LocalDateTime.of(2020, 5, 1, 15, 0))
+                .basePrice(100)
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .free(true)
+                .offline(false)
+                .eventStatus(EventStatus.PUBLISHED)
+                .build();
+
+        given(eventRepository.save(event)).willReturn(event);
+
+        mockMvc.perform(post("/api/events")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .characterEncoding("utf8")
+                    .accept(MediaTypes.HAL_JSON)
+                    .content(objectMapper.writeValueAsString(event)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
     }
 
 
