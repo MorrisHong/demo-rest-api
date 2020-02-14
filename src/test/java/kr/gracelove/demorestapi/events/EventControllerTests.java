@@ -104,5 +104,25 @@ public class EventControllerTests {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void createEvent_bad_request_wrong_input() throws Exception {
+        EventCreateDto dto = EventCreateDto.builder()
+                .name("모각코")
+                .description("모여서 각자 코딩")
+                .beginEnrollmentDateTime(LocalDateTime.of(2020, 4, 20, 17, 0))
+                .closeEnrollmentDateTime(LocalDateTime.of(2020, 4, 19, 17, 0))
+                .beginEventDateTime(LocalDateTime.of(2020, 5, 1, 13, 0))
+                .endEventDateTime(LocalDateTime.of(2020, 4, 1, 15, 0))
+                .basePrice(10000)
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .build();
+
+        mockMvc.perform(post("/api/events")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
+    }
+
 
 }

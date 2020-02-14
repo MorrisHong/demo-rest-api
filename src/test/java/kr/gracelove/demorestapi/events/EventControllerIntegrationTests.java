@@ -32,7 +32,7 @@ public class EventControllerIntegrationTests {
 
     @Test
     void createEvent() throws Exception {
-        Event event = Event.builder()
+        EventCreateDto dto = EventCreateDto.builder()
                 .name("모각코")
                 .description("모여서 각자 코딩")
                 .beginEnrollmentDateTime(LocalDateTime.of(2020, 4, 20, 17, 0))
@@ -42,20 +42,51 @@ public class EventControllerIntegrationTests {
                 .basePrice(100)
                 .maxPrice(200)
                 .limitOfEnrollment(100)
-                .location("강남역 D2 스타트업 팩토리")
                 .build();
 
         mockMvc.perform(post("/api/events")
                     .contentType(MediaType.APPLICATION_JSON)
                     .characterEncoding("utf8")
                     .accept(MediaTypes.HAL_JSON)
-                    .content(objectMapper.writeValueAsString(event)))
+                    .content(objectMapper.writeValueAsString(dto)))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.eventStatus").value(EventStatus.DRAFT.name()))
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE));
+    }
+
+
+    @Test
+    void createEvent_bad_request_empty_input() throws Exception {
+        EventCreateDto dto = EventCreateDto.builder()
+                .build();
+
+        mockMvc.perform(post("/api/events")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createEvent_bad_request_wrong_input() throws Exception {
+        EventCreateDto dto = EventCreateDto.builder()
+                .name("모각코")
+                .description("모여서 각자 코딩")
+                .beginEnrollmentDateTime(LocalDateTime.of(2020, 4, 20, 17, 0))
+                .closeEnrollmentDateTime(LocalDateTime.of(2020, 4, 19, 17, 0))
+                .beginEventDateTime(LocalDateTime.of(2020, 5, 1, 13, 0))
+                .endEventDateTime(LocalDateTime.of(2020, 4, 1, 15, 0))
+                .basePrice(10000)
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .build();
+
+        mockMvc.perform(post("/api/events")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
     }
 
 

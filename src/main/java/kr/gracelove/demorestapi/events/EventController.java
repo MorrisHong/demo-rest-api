@@ -18,17 +18,25 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 public class EventController {
 
     private final EventRepository eventRepository;
+    private final EventValidator eventValidator;
 
-    public EventController(EventRepository eventRepository) {
+    public EventController(EventRepository eventRepository, EventValidator eventValidator) {
         this.eventRepository = eventRepository;
+        this.eventValidator = eventValidator;
     }
 
     @PostMapping("/api/events")
-    public ResponseEntity<Event> createEvent(@RequestBody @Valid EventCreateDto event, BindingResult result) {
+    public ResponseEntity<Event> createEvent(@RequestBody @Valid EventCreateDto dto, BindingResult result) {
         if(result.hasErrors()) {
             return ResponseEntity.badRequest().build();
         }
-        Event newEvent = eventRepository.save(event.toEntity());
+        eventValidator.validate(dto, result);
+
+        if(result.hasErrors()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Event newEvent = eventRepository.save(dto.toEntity());
         URI uri = linkTo((EventController.class)).slash(newEvent.getId()).toUri();
         return ResponseEntity.created(uri).body(newEvent);
     }
