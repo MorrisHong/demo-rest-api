@@ -1,7 +1,6 @@
 package kr.gracelove.demorestapi.events;
 
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,8 +22,8 @@ public class EventController {
     }
 
     @PostMapping("/api/events")
-    public ResponseEntity<Event> createEvent(@RequestBody Event event) {
-        Event newEvent = eventRepository.save(event);
+    public ResponseEntity<Event> createEvent(@RequestBody EventCreateDto event) {
+        Event newEvent = eventRepository.save(event.toEntity());
         URI uri = linkTo((EventController.class)).slash(newEvent.getId()).toUri();
         return ResponseEntity.created(uri).body(newEvent);
     }
