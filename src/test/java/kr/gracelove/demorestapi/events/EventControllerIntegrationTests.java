@@ -35,6 +35,7 @@ public class EventControllerIntegrationTests {
         EventCreateDto dto = EventCreateDto.builder()
                 .name("모각코")
                 .description("모여서 각자 코딩")
+                .location("강남역")
                 .beginEnrollmentDateTime(LocalDateTime.of(2020, 4, 20, 17, 0))
                 .closeEnrollmentDateTime(LocalDateTime.of(2020, 4, 21, 17, 0))
                 .beginEventDateTime(LocalDateTime.of(2020, 5, 1, 13, 0))
@@ -52,6 +53,8 @@ public class EventControllerIntegrationTests {
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.free").value(false))
+                .andExpect(jsonPath("$.offline").value(true))
                 .andExpect(jsonPath("$.eventStatus").value(EventStatus.DRAFT.name()))
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE));
