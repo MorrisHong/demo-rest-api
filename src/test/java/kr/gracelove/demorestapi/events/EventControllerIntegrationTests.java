@@ -76,7 +76,8 @@ public class EventControllerIntegrationTests {
                         links(
                                 linkWithRel("self").description("link to self"),
                                 linkWithRel("query-events").description("link to query events"),
-                                linkWithRel("update-events").description("link to update an event")
+                                linkWithRel("update-events").description("link to update an event"),
+                                linkWithRel("profile").description("event information")
                         ),
                         requestHeaders(
                                 headerWithName(HttpHeaders.ACCEPT).description("accept header"),
@@ -115,7 +116,8 @@ public class EventControllerIntegrationTests {
                                 fieldWithPath("eventStatus").description("status of event"),
                                 fieldWithPath("_links.self.href").description("link to self"),
                                 fieldWithPath("_links.query-events.href").description("link to query events"),
-                                fieldWithPath("_links.update-events.href").description("link to update events")
+                                fieldWithPath("_links.update-events.href").description("link to update an event"),
+                                fieldWithPath("_links.profile.href").description("link to profile")
                         )
                 ));
     }
