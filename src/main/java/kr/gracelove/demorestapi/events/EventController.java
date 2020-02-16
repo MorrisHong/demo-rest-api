@@ -1,5 +1,6 @@
 package kr.gracelove.demorestapi.events;
 
+import kr.gracelove.demorestapi.common.BindingResultResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
@@ -28,14 +29,14 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<EventResource> createEvent(@RequestBody @Valid EventCreateDto dto, BindingResult result) {
+    public ResponseEntity<?> createEvent(@RequestBody @Valid EventCreateDto dto, BindingResult result) {
         if(result.hasErrors()) {
-            return ResponseEntity.badRequest().build();
+            return badRequest(result);
         }
         eventValidator.validate(dto, result);
 
         if(result.hasErrors()) {
-            return ResponseEntity.badRequest().build();
+            return badRequest(result);
         }
 
         Event newEvent = eventRepository.save(dto.toEntity());
@@ -47,5 +48,9 @@ public class EventController {
         eventResource.add(selfLinkBuilder.withRel("update-events"));
         eventResource.add(new Link("/docs/index.html#resources-events-create").withRel("profile"));
         return ResponseEntity.created(uri).body(eventResource);
+    }
+
+    private ResponseEntity<?> badRequest(BindingResult result) {
+        return ResponseEntity.badRequest().body(new BindingResultResource(result));
     }
 }
