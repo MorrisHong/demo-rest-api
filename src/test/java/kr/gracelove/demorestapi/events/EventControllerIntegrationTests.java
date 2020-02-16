@@ -182,13 +182,38 @@ public class EventControllerIntegrationTests {
         //then
     }
 
-    private void generateEvent(int index) {
+    @Test
+    void 기존_이벤트_하나_조회() throws Exception {
+        //given
+        Event event = this.generateEvent(100);
+
+        //when
+        mockMvc.perform(get("/api/events/{id}", event.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("name").exists())
+                .andExpect(jsonPath("id").exists())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+                .andDo(document("get-an-event"));
+
+        //then
+     }
+
+     @Test
+     void 없는_이벤트_조회_404_응답() throws Exception {
+         mockMvc.perform(get("/api/events/123123123"))
+                 .andExpect(status().isNotFound());
+      }
+
+    private Event generateEvent(int index) {
         Event event = Event.builder()
                 .name("event" + index)
                 .description("test event")
                 .build();
 
         eventRepository.save(event);
+
+        return event;
     }
 
 

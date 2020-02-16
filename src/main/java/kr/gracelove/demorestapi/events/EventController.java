@@ -12,13 +12,11 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -42,14 +40,27 @@ public class EventController {
         return ResponseEntity.ok(entityModels);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getEvent(@PathVariable Integer id) {
+        Optional<Event> optionalEvent = this.eventRepository.findById(id);
+        if (optionalEvent.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Event event = optionalEvent.get();
+        EventResource resource = new EventResource(event);
+        resource.add(new Link("/docs/index.html#resources-events-get").withRel("profile"));
+        return ResponseEntity.ok(resource);
+    }
+
     @PostMapping
     public ResponseEntity<?> createEvent(@RequestBody @Valid EventCreateDto dto, BindingResult result) {
-        if(result.hasErrors()) {
+        if (result.hasErrors()) {
             return badRequest(result);
         }
         eventValidator.validate(dto, result);
 
-        if(result.hasErrors()) {
+        if (result.hasErrors()) {
             return badRequest(result);
         }
 
