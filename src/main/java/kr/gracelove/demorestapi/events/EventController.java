@@ -9,6 +9,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -51,6 +52,33 @@ public class EventController {
         EventResource resource = new EventResource(event);
         resource.add(new Link("/docs/index.html#resources-events-get").withRel("profile"));
         return ResponseEntity.ok(resource);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updatEvent(@PathVariable Integer id, @RequestBody @Valid EventCreateDto eventDto,
+                                        BindingResult result) {
+        Optional<Event> optionalEvent = this.eventRepository.findById(id);
+        if (optionalEvent.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (result.hasErrors()) {
+            return badRequest(result);
+        }
+
+        this.eventValidator.validate(eventDto, result);
+        if (result.hasErrors()) {
+            return badRequest(result);
+        }
+
+        Event existingEvent = optionalEvent.get();
+        eventDto.toEntity();
+        Event savedEvent = this.eventRepository.save(existingEvent);
+
+        EventResource eventResource = new EventResource(savedEvent);
+        eventResource.add(new Link("/docs/index.html#resources-events-update").withRel("profile"));
+
+        return ResponseEntity.ok(eventResource);
     }
 
     @PostMapping

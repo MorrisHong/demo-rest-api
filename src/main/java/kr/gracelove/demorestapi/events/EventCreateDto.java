@@ -46,4 +46,20 @@ public class EventCreateDto {
                 .eventStatus(EventStatus.DRAFT)
                 .build();
     }
+
+    public static EventCreateDto createDto(Event event) {
+        EventCreateDto dto = EventCreateDto.builder()
+                .name(event.getName())
+                .description(event.getName())
+                .beginEnrollmentDateTime(event.getBeginEnrollmentDateTime())
+                .closeEnrollmentDateTime(event.getCloseEnrollmentDateTime())
+                .beginEventDateTime(event.getBeginEventDateTime())
+                .endEventDateTime(event.getEndEventDateTime())
+                .location(event.getLocation())
+                .basePrice(event.getBasePrice())
+                .maxPrice(event.getMaxPrice())
+                .limitOfEnrollment(event.getLimitOfEnrollment())
+                .build();
+        return dto;
+    }
 }
