@@ -17,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.stream.IntStream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -25,6 +26,7 @@ import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.li
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -40,6 +42,9 @@ public class EventControllerIntegrationTests {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    EventRepository eventRepository;
 
     @Test
     void createEvent() throws Exception {
@@ -154,6 +159,36 @@ public class EventControllerIntegrationTests {
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("_links.index").exists());
+    }
+
+    //30개 이벤트를 10개씩 두번째 페이지 조회.
+    @Test
+    void queryEvents() throws Exception {
+        //given
+        IntStream.range(0, 30).forEach(this::generateEvent);
+        //when
+        mockMvc.perform(get("/api/events")
+                    .param("page", "1") //page는 0부터 시작.
+                    .param("size", "10")
+//                    .param("sort", "name.DESC")
+        )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("page").exists())
+                .andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+                .andDo(document("query-events"));
+        //then
+    }
+
+    private void generateEvent(int index) {
+        Event event = Event.builder()
+                .name("event" + index)
+                .description("test event")
+                .build();
+
+        eventRepository.save(event);
     }
 
 

@@ -1,12 +1,18 @@
 package kr.gracelove.demorestapi.events;
 
 import kr.gracelove.demorestapi.common.BindingResultResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +32,14 @@ public class EventController {
     public EventController(EventRepository eventRepository, EventValidator eventValidator) {
         this.eventRepository = eventRepository;
         this.eventValidator = eventValidator;
+    }
+
+    @GetMapping
+    public ResponseEntity<?> queryEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler) {
+        Page<Event> page = eventRepository.findAll(pageable);
+        PagedModel<EntityModel<Event>> entityModels = assembler.toModel(page, e -> new EventResource(e));
+        entityModels.add(new Link("/docs/index.html#resources-events-list").withRel("profile"));
+        return ResponseEntity.ok(entityModels);
     }
 
     @PostMapping
