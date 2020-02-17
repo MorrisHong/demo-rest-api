@@ -1,5 +1,6 @@
 package kr.gracelove.demorestapi.events;
 
+import kr.gracelove.demorestapi.accounts.Account;
 import lombok.*;
 
 import javax.persistence.*;
@@ -20,7 +21,7 @@ public class Event {
     private LocalDateTime closeEnrollmentDateTime;
     private LocalDateTime beginEventDateTime;
     private LocalDateTime endEventDateTime;
-    private String location; // (optional) 이게 없으면 온라인 모임 private int basePrice;
+    private String location; // (optional) 이게 없으면 온라인 모임
     private int basePrice;
     private int maxPrice;
     private int limitOfEnrollment;
@@ -28,6 +29,8 @@ public class Event {
     private boolean free;
     @Enumerated(EnumType.STRING)
     private EventStatus eventStatus;
+    @ManyToOne
+    private Account manager;
 
     public void update() {
         this.free = basePrice == 0 && maxPrice == 0;
