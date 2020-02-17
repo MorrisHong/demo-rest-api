@@ -32,6 +32,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
+    @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
@@ -46,17 +47,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().mvcMatchers("/docs/index.html");
         web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
-    }
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .anonymous()
-                    .and()
-                .formLogin()
-                    .and()
-                .authorizeRequests()
-                    .mvcMatchers(HttpMethod.GET, "/api/**").authenticated()
-                    .anyRequest().authenticated();
     }
 }
